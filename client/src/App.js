@@ -1,5 +1,6 @@
 import React from 'react';
 import io from 'socket.io-client';
+import { v4 as uuidv4 } from 'uuid';
 
 
 class App extends React.Component {
@@ -7,19 +8,24 @@ class App extends React.Component {
     tasks: [],
     taskName: '',
   }
-  componentDidMount() {
+  componentDidMount = () => {
     this.socket = io("http://localhost:8000/");
     this.socket.on('updateTasks', (tasks) => {this.updateTasks(tasks)});
     this.socket.on('addTask', (task) => { this.addTask(task)});
     this.socket.on('removeTask', (id) => {this.removeTask(id)});
   }
-  addTask(task) {
-    this.setState({tasks: [...this.state.tasks, task]})
+  addTask = (task) => {
+    const taskData = {
+      name: task, 
+      id: uuidv4(), 
+    }
+    this.setState({tasks: [...this.state.tasks, taskData]})
+    this.setState({taskName: ''})
   }
   updateTasks = (tasks) => {
     this.setState({ tasks: [...tasks] })
   }
-  removeTask(id) {
+  removeTask = (id) => {
     for(let task of this.state.tasks) {
       if(task.id === id) {
         const array = [...this.state.tasks];
@@ -32,12 +38,12 @@ class App extends React.Component {
       }
     }
   }
-  submitForm(e) {
+  submitForm = (e) => {
     e.preventDefault();
     this.addTask(this.state.taskName);
     this.socket.emit('addTask', this.state.taskName)
   }
-  render() {
+  render = () => {
     const {tasks} = this.state;
     const {removeTask, submitForm} = this;
     return (
